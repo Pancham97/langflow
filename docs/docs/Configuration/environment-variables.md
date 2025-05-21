@@ -68,7 +68,7 @@ If it detects a supported environment variable, then it automatically adopts the
     LANGFLOW_CACHE_TYPE=async
     LANGFLOW_COMPONENTS_PATH=/path/to/components/
     LANGFLOW_CONFIG_DIR=/path/to/config/
-    LANGFLOW_DATABASE_URL=postgresql://user:password@localhost:5432/langflow
+    LANGFLOW_DATABASE_URL=postgresql://user:password@localhost:5555/langflow
     LANGFLOW_DEV=false
     LANGFLOW_FALLBACK_TO_ENV_VAR=false
     LANGFLOW_HEALTH_CHECK_MAX_RETRIES=5
@@ -252,7 +252,7 @@ LANGFLOW_BUNDLE_URLS=["https://github.com/user/repo/commit/hash"]
 LANGFLOW_CACHE_TYPE=async
 LANGFLOW_COMPONENTS_PATH=/path/to/components/
 LANGFLOW_CONFIG_DIR=/path/to/config/
-LANGFLOW_DATABASE_URL=postgresql://user:password@localhost:5432/langflow
+LANGFLOW_DATABASE_URL=postgresql://user:password@localhost:5555/langflow
 LANGFLOW_DEV=false
 LANGFLOW_FALLBACK_TO_ENV_VAR=false
 LANGFLOW_HEALTH_CHECK_MAX_RETRIES=5
@@ -291,7 +291,7 @@ Environment="LANGFLOW_BUNDLE_URLS=[\"https://github.com/user/repo/commit/hash\"]
 Environment="LANGFLOW_CACHE_TYPE=async"
 Environment="LANGFLOW_COMPONENTS_PATH=/path/to/components/"
 Environment="LANGFLOW_CONFIG_DIR=/path/to/config"
-Environment="LANGFLOW_DATABASE_URL=postgresql://user:password@localhost:5432/langflow"
+Environment="LANGFLOW_DATABASE_URL=postgresql://user:password@localhost:5555/langflow"
 Environment="LANGFLOW_DEV=false"
 Environment="LANGFLOW_FALLBACK_TO_ENV_VAR=false"
 Environment="LANGFLOW_HEALTH_CHECK_MAX_RETRIES=5"
@@ -337,7 +337,7 @@ Create or edit the `.vscode/tasks.json` file in your project root:
             "LANGFLOW_CACHE_TYPE": "async",
             "LANGFLOW_COMPONENTS_PATH": "D:/path/to/components/",
             "LANGFLOW_CONFIG_DIR": "D:/path/to/config/",
-            "LANGFLOW_DATABASE_URL": "postgresql://postgres:password@localhost:5432/langflow",
+            "LANGFLOW_DATABASE_URL": "postgresql://postgres:password@localhost:5555/langflow",
             "LANGFLOW_DEV": "false",
             "LANGFLOW_FALLBACK_TO_ENV_VAR": "false",
             "LANGFLOW_HEALTH_CHECK_MAX_RETRIES": "5",

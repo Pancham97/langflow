@@ -60,7 +60,7 @@ If external storage is connected to a memory helper component, no chat messages 
 To replace the default Langflow SQLite database with another database, modify the `LANGFLOW_DATABASE_URL` and start Langflow with this value.
 
 ```
-LANGFLOW_DATABASE_URL=postgresql://user:password@localhost:5432/langflow
+LANGFLOW_DATABASE_URL=postgresql://user:password@localhost:5555/langflow
 ```
 
 For an example, see [Configure an external PostgreSQL database](/configuration-custom-database).

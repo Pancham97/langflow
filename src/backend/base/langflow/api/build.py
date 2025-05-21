@@ -418,6 +418,7 @@ async def generate_flow_events(
         # send built event or error event
         try:
             vertex_build_response_json = vertex_build_response.model_dump_json()
+            print(f"the built vertex json", vertex_build_response_json)
             build_data = json.loads(vertex_build_response_json)
         except Exception as exc:
             msg = f"Error serializing vertex build response: {exc}"

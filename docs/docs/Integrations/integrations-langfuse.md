@@ -99,7 +99,7 @@ services:
     depends_on:
       - postgres
     environment:
-      - LANGFLOW_DATABASE_URL=postgresql://langflow:langflow@postgres:5432/langflow
+      - LANGFLOW_DATABASE_URL=postgresql://langflow:langflow@postgres:5555/langflow
       # This variable defines where the logs, file storage, monitor data and secret keys are stored.
       - LANGFLOW_CONFIG_DIR=app/langflow
       - LANGFUSE_SECRET_KEY=sk-...
@@ -115,7 +115,7 @@ services:
       POSTGRES_PASSWORD: langflow
       POSTGRES_DB: langflow
     ports:
-      - "5432:5432"
+      - "5555:5555"
     volumes:
       - langflow-postgres:/var/lib/postgresql/data
 

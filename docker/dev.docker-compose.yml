@@ -14,7 +14,7 @@ services:
       - "3000:3000"
     environment:
       - PYTHONDONTWRITEBYTECODE=1
-      - LANGFLOW_DATABASE_URL=postgresql://langflow:langflow@postgres:5432/langflow
+      - LANGFLOW_DATABASE_URL=postgresql://langflow:langflow@postgres:5555/langflow
       - LANGFLOW_SUPERUSER=langflow
       - LANGFLOW_SUPERUSER_PASSWORD=langflow
       - LANGFLOW_CONFIG_DIR=/var/lib/langflow
@@ -25,8 +25,7 @@ services:
     depends_on:
       - postgres
     networks:
-      -  dev-langflow
-
+      - dev-langflow
 
   postgres:
     container_name: postgres
@@ -36,7 +35,6 @@ services:
       POSTGRES_PASSWORD: langflow
       POSTGRES_DB: langflow
     ports:
-      - "5432:5432"
+      - "5555:5555"
     networks:
-      -  dev-langflow
-
+      - dev-langflow

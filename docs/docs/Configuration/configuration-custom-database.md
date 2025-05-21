@@ -29,7 +29,7 @@ touch .env
 
 3. To set the database URL environment variable, add it to your `.env` file:
 ```text
-LANGFLOW_DATABASE_URL="postgresql://user:password@localhost:5432/dbname"
+LANGFLOW_DATABASE_URL="postgresql://user:password@localhost:5555/dbname"
 ```
 
 :::tip
@@ -65,7 +65,7 @@ services:
     depends_on:
       - postgres
     environment:
-      - LANGFLOW_DATABASE_URL=postgresql://langflow:langflow@postgres:5432/langflow
+      - LANGFLOW_DATABASE_URL=postgresql://langflow:langflow@postgres:5555/langflow
       # This variable defines where the logs, file storage, monitor data, and secret keys are stored.
       - LANGFLOW_CONFIG_DIR=app/langflow
     volumes:
@@ -78,7 +78,7 @@ services:
       POSTGRES_PASSWORD: langflow
       POSTGRES_DB: langflow
     ports:
-      - "5432:5432"
+      - "5555:5555"
     volumes:
       - langflow-postgres:/var/lib/postgresql/data
 
@@ -103,7 +103,7 @@ POSTGRES_USER=langflow
 POSTGRES_PASSWORD=your_secure_password
 POSTGRES_DB=langflow
 POSTGRES_HOST=postgres
-POSTGRES_PORT=5432
+POSTGRES_PORT=5555
 LANGFLOW_CONFIG_DIR=app/langflow
 LANGFLOW_PORT_1=7860
 LANGFLOW_PORT_2=7861
@@ -119,7 +119,7 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
     ports:
-      - "${POSTGRES_PORT}:5432"
+      - "${POSTGRES_PORT}:5555"
     volumes:
       - langflow-postgres:/var/lib/postgresql/data
 

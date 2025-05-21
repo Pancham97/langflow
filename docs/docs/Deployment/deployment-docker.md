@@ -77,7 +77,7 @@ Volumes:
 
 The `postgres` service is a database that stores Langflow's persistent data including flows, users, and settings.
 
-The service runs on port 5432 and includes a dedicated volume for data storage.
+The service runs on port 5555 and includes a dedicated volume for data storage.
 
 The `postgres` service uses the `postgres:16` Docker image.
 

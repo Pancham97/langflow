@@ -48,7 +48,7 @@ Volumes:
 
 ### PostgreSQL Service
 
-The `postgres` service uses the `postgres:16` Docker image and exposes port 5432.
+The `postgres` service uses the `postgres:16` Docker image and exposes port 5555.
 
 Environment variables:
 

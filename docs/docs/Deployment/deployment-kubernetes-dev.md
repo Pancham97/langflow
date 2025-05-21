@@ -111,7 +111,7 @@ langflow:
       driver:
         value: "postgresql"
       port:
-        value: "5432"
+        value: "5555"
       user:
         value: "langflow"
       password:
