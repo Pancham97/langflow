@@ -85,17 +85,19 @@ class DatabaseService(Service):
         url_components = self.database_url.split("://", maxsplit=1)
 
         driver = url_components[0]
-
+        logger.debug(f"Driver: {driver}")
         if driver == "sqlite":
             driver = "sqlite+aiosqlite"
-        elif driver in {"postgresql", "postgres"}:
-            if driver == "postgres":
-                logger.warning(
-                    "The postgres dialect in the database URL is deprecated. "
-                    "Use postgresql instead. "
-                    "To avoid this warning, update the database URL."
-                )
-            driver = "postgresql+psycopg"
+        elif driver == "singlestoredb":
+            # SingleStore driver is already correct
+            pass
+        elif driver in {"singlestore", "memsql"}:
+            # Support alternative names for SingleStore
+            driver = "singlestoredb"
+        else:
+            # Default to SingleStore for unknown drivers
+            logger.warning(f"Unknown database driver '{driver}', defaulting to SingleStore")
+            driver = "singlestoredb"
 
         self.database_url = f"{driver}://{url_components[1]}"
 

@@ -125,6 +125,7 @@ dependencies = [
     "openai>=1.68.2",
     'gassist>=0.0.1; sys_platform == "win32"',
     "twelvelabs>=0.4.7",
+    "sqlalchemy-singlestoredb>=1.1.1",
 ]
 
 [dependency-groups]
@@ -214,12 +215,6 @@ nv-ingest = [
     "nv-ingest-client==2025.4.22.dev20250422",
 ]
 
-postgresql = [
-  "sqlalchemy[postgresql_psycopg2binary]",
-    "sqlalchemy[postgresql_psycopg]",
-
-]
-
 [project.scripts]
 langflow = "langflow.__main__:main"
 
@@ -265,7 +260,7 @@ directory = "coverage"
 
 
 [tool.ruff]
-exclude = ["src/backend/base/langflow/alembic/*", "src/frontend/tests/assets/*"]
+exclude = ["src/backend/base/langflow/alembic/*"]
 line-length = 120
 
 [tool.ruff.lint]

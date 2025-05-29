@@ -1,6 +1,9 @@
 from sqlalchemy.engine import make_url
+from loguru import logger
 
 from langflow.serialization import constants
+from turtledemo.chaos import f
+from doctest import debug
 
 
 def truncate_long_strings(data, max_length=None):
@@ -46,11 +49,14 @@ def is_valid_database_url(url: str) -> bool:
         bool: True if URL is valid, False otherwise
     """
     try:
+        logger.debug(f"Parsing URL: {url}")
         parsed_url = make_url(url)
+        logger.debug(f"URL: {parsed_url}")
         parsed_url.get_dialect()
         parsed_url.get_driver_name()
 
     except Exception:  # noqa: BLE001
-        return False
+      logger.error("Something went wrong")
+      return False
 
     return True

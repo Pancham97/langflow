@@ -24,8 +24,11 @@ class SQLDatabaseComponent(Component):
     ]
 
     def clean_up_uri(self, uri: str) -> str:
-        if uri.startswith("postgres://"):
-            uri = uri.replace("postgres://", "postgresql://")
+        # Handle SingleStore alternative names
+        if uri.startswith("singlestore://"):
+            uri = uri.replace("singlestore://", "singlestoredb://")
+        elif uri.startswith("memsql://"):
+            uri = uri.replace("memsql://", "singlestoredb://")
         return uri.strip()
 
     def build_sqldatabase(self) -> SQLDatabase:
