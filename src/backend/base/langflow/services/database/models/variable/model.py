@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
 from pydantic import ValidationInfo, field_validator
-from sqlmodel import JSON, Column, DateTime, Field, Relationship, SQLModel, func
+from sqlmodel import JSON, Column, DateTime, Field, Relationship, SQLModel, func, String
 
 from langflow.services.variable.constants import CREDENTIAL_TYPE
 
@@ -41,7 +41,8 @@ class Variable(VariableBase, table=True):  # type: ignore[call-arg]
     )
     default_fields: list[str] | None = Field(sa_column=Column(JSON))
     # foreign key to user table
-    user_id: UUID = Field(description="User ID associated with this variable", foreign_key="user.id")
+    # user_id: UUID = Field(description="User ID associated with this variable", foreign_key="user.id")
+    user_id: UUID = Field(sa_column=Column(String(36)))
     user: "User" = Relationship(back_populates="variables")
 
 

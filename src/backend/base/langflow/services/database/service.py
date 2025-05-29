@@ -1,5 +1,6 @@
 from __future__ import annotations
-
+import ssl
+import requests
 import asyncio
 import re
 import sqlite3
@@ -20,6 +21,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from sqlmodel import SQLModel, select, text
+from sqlalchemy import create_engine, text
 from sqlmodel.ext.asyncio.session import AsyncSession
 from tenacity import retry, stop_after_attempt, wait_fixed
 
@@ -133,8 +135,14 @@ class DatabaseService(Service):
             else:
                 logger.error(f"Invalid poolclass '{poolclass_key}' specified. Using default pool class.")
 
+        ca_cert_url = "https://portal.singlestore.com/static/ca/singlestore_bundle.pem"
+        ca_cert_path = "/tmp/singlestore_bundle.pem"
+        response = requests.get(ca_cert_url)
+        with open(ca_cert_path, "wb") as f:
+            f.write(response.content)
+        sql_connection_string = self.database_url.replace("singlestoredb", "mysql+aiomysql")
         return create_async_engine(
-            self.database_url,
+            sql_connection_string,
             connect_args=self._get_connect_args(),
             **kwargs,
         )
@@ -147,8 +155,8 @@ class DatabaseService(Service):
     def _get_connect_args(self):
         settings = self.settings_service.settings
 
-        if settings.db_driver_connection_settings is not None:
-            return settings.db_driver_connection_settings
+        # if settings.db_driver_connection_settings is not None:
+        #     return settings.db_driver_connection_settings
 
         if settings.database_url and settings.database_url.startswith("sqlite"):
             return {
@@ -156,6 +164,18 @@ class DatabaseService(Service):
                 "timeout": settings.db_connect_timeout,
             }
 
+        # Use existing user-provided settings only if they're safe
+        if settings.db_driver_connection_settings:
+            user_args = settings.db_driver_connection_settings
+            if "ssl" in user_args and isinstance(user_args["ssl"], dict):
+                # 🧨 This is your current bug!
+                raise TypeError("`ssl` in `db_driver_connection_settings` must be an `ssl.SSLContext`, not a `dict`.")
+            return user_args
+
+        # Fallback for MySQL-compatible (e.g., SingleStore)
+        if settings.database_url and settings.database_url.startswith("singlestoredb") or settings.database_url.startswith("mysql"):
+            ctx = ssl.create_default_context(cafile="/tmp/singlestore_bundle.pem")
+            return {"ssl": ctx}
         return {}
 
     def on_connection(self, dbapi_connection, _connection_record) -> None:
@@ -437,10 +457,11 @@ class DatabaseService(Service):
             logger.debug("Database and tables already exist")
             return
 
-        logger.debug("Creating database and tables")
+        logger.debug("Creating database and tables...")
 
         for table in SQLModel.metadata.sorted_tables:
             try:
+                logger.debug(f"Creating table {table}")
                 table.create(connection, checkfirst=True)
             except OperationalError as oe:
                 logger.warning(f"Table {table} already exists, skipping. Exception: {oe}")
@@ -452,11 +473,12 @@ class DatabaseService(Service):
         # Now check if the required tables exist, if not, something went wrong.
         inspector = inspect(connection)
         table_names = inspector.get_table_names()
+        missing_tables = [t for t in current_tables if t not in table_names]
+        msg = f"Failed to create tables: {missing_tables}"
         for table in current_tables:
             if table not in table_names:
                 logger.error("Something went wrong creating the database and tables.")
                 logger.error("Please check your database settings.")
-                msg = "Something went wrong creating the database and tables."
                 raise RuntimeError(msg)
 
         logger.debug("Database and tables created successfully")

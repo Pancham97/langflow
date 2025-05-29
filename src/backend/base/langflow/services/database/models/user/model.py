@@ -22,8 +22,13 @@ class UserOptin(BaseModel):
     # Add more opt-in actions as needed
 
 
+
 class User(SQLModel, table=True):  # type: ignore[call-arg]
-    id: UUIDstr = Field(default_factory=uuid4, primary_key=True, unique=True)
+    id: UUID | None = Field(
+        default_factory=uuid4,
+        primary_key=True,
+        description="Unique ID for the user",
+    )
     username: str = Field(index=True, unique=True)
     password: str = Field()
     profile_image: str | None = Field(default=None, nullable=True)
@@ -32,6 +37,8 @@ class User(SQLModel, table=True):  # type: ignore[call-arg]
     create_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     last_login_at: datetime | None = Field(default=None, nullable=True)
+
+    # These relationships are kept, but underlying FK constraints are removed
     api_keys: list["ApiKey"] = Relationship(
         back_populates="user",
         sa_relationship_kwargs={"cascade": "delete"},
@@ -46,7 +53,7 @@ class User(SQLModel, table=True):  # type: ignore[call-arg]
         back_populates="user",
         sa_relationship_kwargs={"cascade": "delete"},
     )
-    optins: dict[str, Any] | None = Field(
+    options: dict[str, Any] | None = Field(
         sa_column=Column(JSON, default=lambda: UserOptin().model_dump(), nullable=True)
     )
 

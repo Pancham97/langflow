@@ -1,5 +1,4 @@
 # Path: src/backend/langflow/services/database/models/flow/model.py
-
 import re
 from datetime import datetime, timezone
 from enum import Enum
@@ -17,8 +16,8 @@ from pydantic import (
     field_validator,
 )
 from sqlalchemy import Enum as SQLEnum
-from sqlalchemy import Text, UniqueConstraint, text
-from sqlmodel import JSON, Column, Field, Relationship, SQLModel
+from sqlalchemy import Text, text
+from sqlmodel import JSON, Column, Field, Relationship, SQLModel, String
 
 from langflow.schema import Data
 
@@ -189,16 +188,18 @@ class FlowBase(SQLModel):
 
 
 class Flow(FlowBase, table=True):  # type: ignore[call-arg]
-    id: UUID = Field(default_factory=uuid4, primary_key=True, unique=True)
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
     data: dict | None = Field(default=None, sa_column=Column(JSON))
-    user_id: UUID | None = Field(index=True, foreign_key="user.id", nullable=True)
-    user: "User" = Relationship(back_populates="flows")
+    # user_id: UUID | None = Field(index=True, foreign_key="user.id", nullable=True)
+    user_id: UUID = Field(sa_column=Column(String(36), index=True))
     icon: str | None = Field(default=None, nullable=True)
-    tags: list[str] | None = Field(sa_column=Column(JSON), default=[])
+    tags: list[str] | None = Field(sa_column=Column(JSON))
     locked: bool | None = Field(default=False, nullable=True)
-    folder_id: UUID | None = Field(default=None, foreign_key="folder.id", nullable=True, index=True)
+    # folder_id: UUID | None = Field(default=None, foreign_key="folder.id", nullable=True, index=True)
+    folder_id: UUID = Field(sa_column=Column(String(36), index=True))
     fs_path: str | None = Field(default=None, nullable=True)
     folder: Optional["Folder"] = Relationship(back_populates="flows")
+    user: "User" = Relationship(back_populates="flows")
 
     def to_data(self):
         serialized = self.model_dump()
@@ -210,12 +211,6 @@ class Flow(FlowBase, table=True):  # type: ignore[call-arg]
             "updated_at": serialized.pop("updated_at"),
         }
         return Data(data=data)
-
-    __table_args__ = (
-        UniqueConstraint("user_id", "name", name="unique_flow_name"),
-        UniqueConstraint("user_id", "endpoint_name", name="unique_flow_endpoint_name"),
-    )
-
 
 class FlowCreate(FlowBase):
     user_id: UUID | None = None

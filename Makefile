@@ -1,10 +1,9 @@
-.PHONY: all init format_backend format_frontend format lint build build_frontend install_frontend run_frontend run_backend dev help tests coverage clean_python_cache clean_npm_cache clean_all
+.PHONY: all init format_backend format lint build install_backend run_backend dev help tests coverage clean_python_cache clean_all
 
 # Configurations
 VERSION=$(shell grep "^version" pyproject.toml | sed 's/.*\"\(.*\)\"$$/\1/')
 DOCKERFILE=docker/build_and_push.Dockerfile
 DOCKERFILE_BACKEND=docker/build_and_push_backend.Dockerfile
-DOCKERFILE_FRONTEND=docker/frontend/build_and_push_frontend.Dockerfile
 DOCKER_COMPOSE=docker_example/docker-compose.yml
 PYTHON_REQUIRED=$(shell grep '^requires-python[[:space:]]*=' pyproject.toml | sed -n 's/.*"\([^"]*\)".*/\1/p')
 RED=\033[0;31m
@@ -16,7 +15,6 @@ host ?= 0.0.0.0
 port ?= 7860
 env ?= .env
 open_browser ?= true
-path = src/backend/base/langflow/frontend
 workers ?= 1
 async ?= true
 lf ?= false
@@ -44,7 +42,6 @@ patch: ## bump the version in langflow and langflow-base
 # check for required tools
 check_tools:
 	@command -v uv >/dev/null 2>&1 || { echo >&2 "$(RED)uv is not installed. Aborting.$(NC)"; exit 1; }
-	@command -v npm >/dev/null 2>&1 || { echo >&2 "$(RED)NPM is not installed. Aborting.$(NC)"; exit 1; }
 	@echo "$(GREEN)All required tools are installed.$(NC)"
 
 
@@ -65,29 +62,10 @@ reinstall_backend: ## forces reinstall all dependencies (no caching)
 
 install_backend: ## install the backend dependencies
 	@echo 'Installing backend dependencies'
-	@uv sync --frozen --extra "postgresql" $(EXTRA_ARGS)
+	@uv sync --frozen $(EXTRA_ARGS)
 
-install_frontend: ## install the frontend dependencies
-	@echo 'Installing frontend dependencies'
-	@cd src/frontend && npm install > /dev/null 2>&1
-
-build_frontend: ## build the frontend static files
-	@echo '==== Starting frontend build ===='
-	@echo 'Current directory: $$(pwd)'
-	@echo 'Checking if src/frontend exists...'
-	@ls -la src/frontend || true
-	@echo 'Building frontend static files...'
-	@cd src/frontend && CI='' npm run build 2>&1 || { echo "\nBuild failed! Error output above ☝️"; exit 1; }
-	@echo 'Clearing destination directory...'
-	$(call CLEAR_DIRS,src/backend/base/langflow/frontend)
-	@echo 'Copying build files...'
-	@cp -r src/frontend/build/. src/backend/base/langflow/frontend
-	@echo '==== Frontend build complete ===='
-
-init: check_tools clean_python_cache clean_npm_cache ## initialize the project
+init: check_tools clean_python_cache ## initialize the project
 	@make install_backend
-	@make install_frontend
-	@make build_frontend
 	@echo "$(GREEN)All requirements are installed.$(NC)"
 	@uv run langflow run
 
@@ -104,14 +82,7 @@ clean_python_cache:
 	$(call CLEAR_DIRS,.mypy_cache )
 	@echo "$(GREEN)Python cache cleaned.$(NC)"
 
-clean_npm_cache:
-	@echo "Cleaning npm cache..."
-	cd src/frontend && npm cache clean --force
-	$(call CLEAR_DIRS,src/frontend/node_modules src/frontend/build src/backend/base/langflow/frontend)
-	rm -f src/frontend/package-lock.json
-	@echo "$(GREEN)NPM cache and frontend directories cleaned.$(NC)"
-
-clean_all: clean_python_cache clean_npm_cache # clean all caches and temporary directories
+clean_all: clean_python_cache # clean all caches and temporary directories
 	@echo "$(GREEN)All caches and temporary directories cleaned.$(NC)"
 
 setup_uv: ## install poetry using pipx
@@ -201,10 +172,7 @@ format_backend: ## backend code formatters
 	@uv run ruff check . --fix
 	@uv run ruff format . --config pyproject.toml
 
-format_frontend: ## frontend code formatters
-	@cd src/frontend && npm run format
-
-format: format_backend format_frontend ## run code formatters
+format: format_backend ## run code formatters
 
 unsafe_fix:
 	@uv run ruff check . --fix --unsafe-fixes
@@ -212,27 +180,9 @@ unsafe_fix:
 lint: install_backend ## run linters
 	@uv run mypy --namespace-packages -p "langflow"
 
-install_frontendci:
-	@cd src/frontend && npm ci > /dev/null 2>&1
-
-install_frontendc:
-	@cd src/frontend && $(call CLEAR_DIRS,node_modules) && rm -f package-lock.json && npm install > /dev/null 2>&1
-
-run_frontend: ## run the frontend
-	@-kill -9 `lsof -t -i:3000`
-	@cd src/frontend && npm start $(if $(FRONTEND_START_FLAGS),-- $(FRONTEND_START_FLAGS))
-
-tests_frontend: ## run frontend tests
-ifeq ($(UI), true)
-	@cd src/frontend && npx playwright test --ui --project=chromium
-else
-	@cd src/frontend && npx playwright test --project=chromium
-endif
-
-run_cli: install_frontend install_backend build_frontend ## run the CLI
+run_cli: install_backend ## run the CLI
 	@echo 'Running the CLI'
 	@uv run langflow run \
-		--frontend-path $(path) \
 		--log-level $(log_level) \
 		--host $(host) \
 		--port $(port) \
@@ -241,9 +191,6 @@ run_cli: install_frontend install_backend build_frontend ## run the CLI
 
 run_cli_debug:
 	@echo 'Running the CLI in debug mode'
-	@make install_frontend > /dev/null
-	@echo 'Building the frontend'
-	@make build_frontend > /dev/null
 	@echo 'Install backend dependencies'
 	@make install_backend > /dev/null
 ifdef env
@@ -252,21 +199,11 @@ else
 	@make start host=$(host) port=$(port) log_level=debug
 endif
 
-
 setup_devcontainer: ## set up the development container
 	make install_backend
-	make install_frontend
-	make build_frontend
-	uv run langflow --frontend-path src/frontend/build
 
 setup_env: ## set up the environment
 	@sh ./scripts/setup/setup_env.sh
-
-frontend: install_frontend ## run the frontend in development mode
-	make run_frontend
-
-frontendc: install_frontendc
-	make run_frontend
 
 
 backend: setup_env install_backend ## run the backend in development mode
@@ -304,16 +241,12 @@ build_and_install: ## build the project and install it
 	$(call CLEAR_DIRS,dist src/backend/base/dist)
 	make build && uv run pip install dist/*.whl && pip install src/backend/base/dist/*.whl --force-reinstall
 
-build: setup_env ## build the frontend static files and package the project
+build: setup_env ## build the backend package
 ifdef base
-	make install_frontendci
-	make build_frontend
 	make build_langflow_base args="$(args)"
 endif
 
 ifdef main
-	make install_frontendci
-	make build_frontend
 	make build_langflow_base args="$(args)"
 	make build_langflow args="$(args)"
 endif
@@ -336,8 +269,6 @@ endif
 docker_build: dockerfile_build clear_dockerimage ## build DockerFile
 
 docker_build_backend: dockerfile_build_be clear_dockerimage ## build Backend DockerFile
-
-docker_build_frontend: dockerfile_build_fe clear_dockerimage ## build Frontend Dockerfile
 
 dockerfile_build:
 	@echo 'BUILDING DOCKER IMAGE: ${DOCKERFILE}'
@@ -408,7 +339,7 @@ publish_langflow_testpypi:
 	# TODO: update this to use the test-pypi repository
 	uv publish -r test-pypi
 
-publish: ## build the frontend static files and package the project and publish it to PyPI
+publish: ## build and publish the project to PyPI
 	@echo 'Publishing the project'
 ifdef base
 	make publish_base
@@ -418,7 +349,7 @@ ifdef main
 	make publish_langflow
 endif
 
-publish_testpypi: ## build the frontend static files and package the project and publish it to PyPI
+publish_testpypi: ## build and publish the project to test PyPI
 	@echo 'Publishing the project'
 
 ifdef base
