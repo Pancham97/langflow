@@ -5,26 +5,31 @@ services:
     image: langflowai/langflow:1.0-alpha
     ports:
       - "7860:7860"
-    depends_on:
-      - postgres
+    # depends_on:
+    #   - postgres
     environment:
-      - LANGFLOW_DATABASE_URL=postgresql://langflow:langflow@postgres:5555/langflow
+      # Configure your SingleStore connection string here
+      # - LANGFLOW_DATABASE_URL=singlestoredb://user:password@host:3306/database
+      - LANGFLOW_DATABASE_URL=singlestoredb://pancham-0c9fe:Msr2n.rO%7Bvlf%5DX%7Cgyi57bQfk@svc-452cc4b1-df20-4130-9e2f-e72ba79e3d46-shared-dml.aws-virginia-hd2.svc.singlestore.com:3333/db_pancham_bb4e4
       # This variable defines where the logs, file storage, monitor data and secret keys are stored.
       - LANGFLOW_CONFIG_DIR=app/langflow
     volumes:
       - langflow-data:/app/langflow
 
-  postgres:
-    image: postgres:16
-    environment:
-      POSTGRES_USER: langflow
-      POSTGRES_PASSWORD: langflow
-      POSTGRES_DB: langflow
-    ports:
-      - "5555:5555"
-    volumes:
-      - langflow-postgres:/var/lib/postgresql/data
+  # SingleStore is typically run as a managed service, not in Docker Compose
+  # Configure your LANGFLOW_DATABASE_URL above to connect to your SingleStore cluster
+
+  # postgres:
+  #   image: postgres:16
+  #   environment:
+  #     POSTGRES_USER: langflow
+  #     POSTGRES_PASSWORD: langflow
+  #     POSTGRES_DB: langflow
+  #   ports:
+  #     - "5555:5555"
+  #   volumes:
+  #     - langflow-postgres:/var/lib/postgresql/data
 
 volumes:
-  langflow-postgres:
+  # langflow-postgres:
   langflow-data:

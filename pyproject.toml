@@ -217,12 +217,6 @@ nv-ingest = [
     "nv-ingest-client==2025.4.22.dev20250422",
 ]
 
-postgresql = [
-  "sqlalchemy[postgresql_psycopg2binary]",
-    "sqlalchemy[postgresql_psycopg]",
-
-]
-
 [project.scripts]
 langflow = "langflow.__main__:main"
 

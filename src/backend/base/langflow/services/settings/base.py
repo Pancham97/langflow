@@ -320,7 +320,7 @@ class Settings(BaseSettings):
     @classmethod
     def set_database_url(cls, value, info):
         if value and not is_valid_database_url(value):
-            msg = f"Invalid database_url provided: '{value}'"
+            msg = f"Invalid database_url provided, Pancham: '{value}'"
             raise ValueError(msg)
 
         logger.debug("No database_url provided, trying LANGFLOW_DATABASE_URL env variable")
