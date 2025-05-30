@@ -10,7 +10,6 @@ services:
     environment:
       # Configure your SingleStore connection string here
       # - LANGFLOW_DATABASE_URL=singlestoredb://user:password@host:3306/database
-      - LANGFLOW_DATABASE_URL=singlestoredb://pancham-0c9fe:Msr2n.rO%7Bvlf%5DX%7Cgyi57bQfk@svc-452cc4b1-df20-4130-9e2f-e72ba79e3d46-shared-dml.aws-virginia-hd2.svc.singlestore.com:3333/db_pancham_bb4e4
       # This variable defines where the logs, file storage, monitor data and secret keys are stored.
       - LANGFLOW_CONFIG_DIR=app/langflow
     volumes:

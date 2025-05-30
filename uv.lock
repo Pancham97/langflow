@@ -4753,6 +4753,7 @@ dependencies = [
     { name = "ruff" },
     { name = "scipy" },
     { name = "scrapegraph-py" },
+    { name = "singlestoredb" },
     { name = "smolagents" },
     { name = "spider-client" },
     { name = "sqlalchemy", extra = ["aiosqlite"] },
@@ -4949,11 +4950,10 @@ requires-dist = [
     { name = "scipy", specifier = ">=1.14.1" },
     { name = "scrapegraph-py", specifier = ">=1.12.0" },
     { name = "sentence-transformers", marker = "extra == 'local'", specifier = ">=2.3.1" },
+    { name = "singlestoredb", specifier = ">=1.13.1" },
     { name = "smolagents", specifier = ">=1.8.0" },
     { name = "spider-client", specifier = "==0.1.24" },
     { name = "sqlalchemy", extras = ["aiosqlite"], specifier = ">=2.0.38,<3.0.0" },
-    { name = "sqlalchemy", extras = ["postgresql-psycopg"], marker = "extra == 'postgresql'" },
-    { name = "sqlalchemy", extras = ["postgresql-psycopg2binary"], marker = "extra == 'postgresql'" },
     { name = "sqlalchemy-singlestoredb", specifier = ">=1.1.1" },
     { name = "sseclient-py", specifier = "==1.8.0" },
     { name = "supabase", specifier = "==2.6.0" },
@@ -5087,6 +5087,7 @@ dependencies = [
     { name = "scipy" },
     { name = "sentry-sdk", extra = ["fastapi", "loguru"] },
     { name = "setuptools" },
+    { name = "singlestoredb" },
     { name = "spider-client" },
     { name = "sqlalchemy", extra = ["aiosqlite"] },
     { name = "sqlalchemy-singlestoredb" },
@@ -5235,10 +5236,9 @@ requires-dist = [
     { name = "sentence-transformers", marker = "extra == 'local'", specifier = ">=2.0.0" },
     { name = "sentry-sdk", extras = ["fastapi", "loguru"], specifier = ">=2.5.1,<3.0.0" },
     { name = "setuptools", specifier = ">=70,<76.0.0" },
+    { name = "singlestoredb", specifier = ">=1.13.1" },
     { name = "spider-client", specifier = ">=0.0.27,<1.0.0" },
     { name = "sqlalchemy", extras = ["aiosqlite"], specifier = ">=2.0.38,<3.0.0" },
-    { name = "sqlalchemy", extras = ["postgresql-psycopg"], marker = "extra == 'postgresql'" },
-    { name = "sqlalchemy", extras = ["postgresql-psycopg2binary"], marker = "extra == 'postgresql'" },
     { name = "sqlalchemy-singlestoredb", specifier = ">=1.1.1" },
     { name = "sqlmodel", specifier = "==0.0.22" },
     { name = "trustcall", specifier = ">=0.0.38" },
@@ -9869,19 +9869,6 @@ aiosqlite = [
 ]
 asyncio = [
     { name = "greenlet" },
-]
-
-[[package]]
-name = "sqlalchemy-singlestoredb"
-version = "1.1.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "singlestoredb" },
-    { name = "sqlalchemy" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/ab/10/274e14d7231b9bc197bc1103f1dcdae54be083d4545ea647acdb01c14d17/sqlalchemy_singlestoredb-1.1.1.tar.gz", hash = "sha256:a44edbf3d469e916c41592ed0ce5c703cf506677b446ec7d5a12989235581bb5", size = 18412, upload-time = "2024-09-05T15:20:35.174Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/76/6b/513746a7101050a81cb0637dd0a9d2d6b36c1cbd322a1a7f5be83ea1362b/sqlalchemy_singlestoredb-1.1.1-py3-none-any.whl", hash = "sha256:63dd6446fa306ec4269ac3a72252d58c454d22801dbd69eba5a5ad94223ec2b3", size = 20769, upload-time = "2024-09-05T15:20:34.301Z" },
 ]
 
 [[package]]

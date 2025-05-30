@@ -91,6 +91,7 @@ dependencies = [
     "trustcall>=0.0.38",
     "sqlalchemy-singlestoredb>=1.1.1",
     "pymysql>=1.1.1",
+    "singlestoredb>=1.13.1",
 ]
 
 [dependency-groups]

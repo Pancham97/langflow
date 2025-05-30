@@ -95,11 +95,11 @@ ifdef devel
 endif
 
 ifdef main
-	@uv add $(main)
+	@uv add $(main) --active
 endif
 
 ifdef base
-	@cd src/backend/base && uv add $(base)
+	@cd src/backend/base && uv add $(base) --active
 endif
 
 

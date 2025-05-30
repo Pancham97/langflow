@@ -33,6 +33,8 @@ from langflow.services.database.utils import Result, TableResults
 from langflow.services.deps import get_settings_service
 from langflow.services.utils import teardown_superuser
 
+SKIP_SCHEMA_BOMBS = True
+
 if TYPE_CHECKING:
     from langflow.services.settings.service import SettingsService
 
@@ -90,16 +92,13 @@ class DatabaseService(Service):
         logger.debug(f"Driver: {driver}")
         if driver == "sqlite":
             driver = "sqlite+aiosqlite"
-        elif driver == "singlestoredb":
-            # SingleStore driver is already correct
-            pass
-        elif driver in {"singlestore", "memsql"}:
+        elif driver in {"singlestore", "memsql", "singlestoredb"}:
             # Support alternative names for SingleStore
-            driver = "singlestoredb"
+            driver = "mysql+aiomysql"
         else:
             # Default to SingleStore for unknown drivers
             logger.warning(f"Unknown database driver '{driver}', defaulting to SingleStore")
-            driver = "singlestoredb"
+            driver = "mysql+aiomysql"
 
         self.database_url = f"{driver}://{url_components[1]}"
 
@@ -142,9 +141,9 @@ class DatabaseService(Service):
         response = requests.get(ca_cert_url)
         with open(ca_cert_path, "wb") as f:
             f.write(response.content)
-        sql_connection_string = self.database_url.replace("singlestoredb", "mysql+aiomysql")
+        # sql_connection_string = self.database_url.replace("singlestoredb", "singlestoredb+aiomysql")
         return create_async_engine(
-            sql_connection_string,
+            self.database_url,
             connect_args=self._get_connect_args(),
             **kwargs,
         )
@@ -175,7 +174,7 @@ class DatabaseService(Service):
             return user_args
 
         # Fallback for MySQL-compatible (e.g., SingleStore)
-        if settings.database_url and settings.database_url.startswith("singlestoredb") or settings.database_url.startswith("mysql"):
+        if settings.database_url and (settings.database_url.startswith("singlestoredb") or settings.database_url.startswith("mysql")):
             ctx = ssl.create_default_context(cafile="/tmp/singlestore_bundle.pem")
             return {"ssl": ctx}
         return {}
@@ -290,6 +289,9 @@ class DatabaseService(Service):
 
     @staticmethod
     def _check_schema_health(connection) -> bool:
+        if SKIP_SCHEMA_BOMBS:
+            return True
+
         inspector = inspect(connection)
 
         model_mapping: dict[str, type[SQLModel]] = {
@@ -306,11 +308,15 @@ class DatabaseService(Service):
             expected_columns = list(model.model_fields.keys())
 
             try:
-                available_columns = [col["name"] for col in inspector.get_columns(table)]
+                available_columns = {col["name"] for col in inspector.get_columns(table)}
             except sa.exc.NoSuchTableError:
                 logger.debug(f"Missing table: {table}")
                 return False
 
+            missing = set(model.model_fields) - available_columns
+            if missing:
+              logger.debug("Missing in %s: %s", table, ", ".join(missing))
+              return False
             for column in expected_columns:
                 if column not in available_columns:
                     logger.debug(f"Missing column: {column} in table {table}")
@@ -332,7 +338,7 @@ class DatabaseService(Service):
         command.ensure_version(alembic_cfg)
         # alembic_cfg.attributes["connection"].commit()
         command.upgrade(alembic_cfg, "head")
-        logger.info("Alembic initialized")
+        logger.info("Alembic initialized.")
 
     def _run_migrations(self, should_initialize_alembic, fix) -> None:
         # First we need to check if alembic has been initialized

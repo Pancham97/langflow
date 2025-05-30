@@ -1,7 +1,7 @@
 # noqa: INP001
 import asyncio
 from logging.config import fileConfig
-
+import ssl, pathlib, requests
 from alembic import context
 from sqlalchemy import pool, text
 from sqlalchemy.event import listen
@@ -89,12 +89,20 @@ def _do_run_migrations(connection):
             connection.execute(text("SELECT pg_advisory_xact_lock(112233);"))
         context.run_migrations()
 
+CERT_URL   = "https://portal.singlestore.com/static/ca/singlestore_bundle.pem"
+CERT_PATH  = pathlib.Path("/tmp/singlestore_bundle.pem")
+
+def _ssl_ctx() -> dict[str, ssl.SSLContext]:
+    if not CERT_PATH.exists():  # cheap runtime cache
+        CERT_PATH.write_bytes(requests.get(CERT_URL, timeout=5).content)
+    return {"ssl": ssl.create_default_context(cafile=str(CERT_PATH))}
 
 async def _run_async_migrations() -> None:
     connectable = async_engine_from_config(
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
+        connect_args=_ssl_ctx()
     )
 
     if connectable.dialect.name == "sqlite":
